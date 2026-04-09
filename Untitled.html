@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PandaHecker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    background: #000;
+    color: #fff;
+    font-family: monospace;
+    overflow: hidden;
+}
+
+#terminal {
+    padding: 20px;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.line {
+    margin: 5px 0;
+}
+
+.input-line {
+    display: flex;
+}
+
+.prompt {
+    margin-right: 5px;
+}
+
+input {
+    background: none;
+    border: none;
+    color: white;
+    outline: none;
+    font-family: monospace;
+    width: 100%;
+}
+
+.glow {
+    text-shadow: 0 0 5px white;
+}
+</style>
+</head>
+
+<body>
+
+<div id="terminal">
+    <div class="line glow">[ PandaHecker v1.0 ]</div>
+    <div class="line">Type "help" to begin.</div>
+</div>
+
+<script>
+const terminal = document.getElementById("terminal");
+
+function addLine(text) {
+    const line = document.createElement("div");
+    line.className = "line";
+    line.textContent = text;
+    terminal.appendChild(line);
+    terminal.scrollTop = terminal.scrollHeight;
+}
+
+function createInput() {
+    const line = document.createElement("div");
+    line.className = "input-line";
+
+    const prompt = document.createElement("span");
+    prompt.className = "prompt";
+    prompt.textContent = ">";
+
+    const input = document.createElement("input");
+
+    line.appendChild(prompt);
+    line.appendChild(input);
+    terminal.appendChild(line);
+
+    input.focus();
+
+    input.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            handleCommand(input.value);
+            line.remove();
+        }
+    });
+}
+
+function handleCommand(cmd) {
+    addLine("> " + cmd);
+
+    cmd = cmd.toLowerCase();
+
+    if (cmd === "help") {
+        addLine("Commands:");
+        addLine("about - who I am");
+        addLine("projects - my work");
+        addLine("clear - clear screen");
+        addLine("contact - info");
+    }
+
+    else if (cmd === "about") {
+        addLine("PandaHecker - Developer & Builder");
+        addLine("Creating tools, games, and systems.");
+    }
+
+    else if (cmd === "projects") {
+        addLine("• Code Jumpers");
+        addLine("• Custom tools");
+        addLine("• Experimental builds");
+    }
+
+    else if (cmd === "contact") {
+        addLine("Coming soon...");
+    }
+
+    else if (cmd === "clear") {
+        terminal.innerHTML = "";
+    }
+
+    else {
+        addLine("Unknown command");
+    }
+
+    createInput();
+}
+
+// typing effect intro
+const introText = "Initializing system...";
+let i = 0;
+
+function typeIntro() {
+    if (i < introText.length) {
+        document.querySelector(".line").textContent += introText.charAt(i);
+        i++;
+        setTimeout(typeIntro, 40);
+    } else {
+        createInput();
+    }
+}
+
+document.querySelector(".line").textContent = "";
+typeIntro();
+</script>
+
+</body>
+</html>
