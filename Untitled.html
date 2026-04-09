@@ -9,53 +9,117 @@
 body {
     margin: 0;
     background: #000;
-    color: #fff;
-    font-family: monospace;
+    color: #0f0;
+    font-family: 'Courier New', monospace;
     overflow: hidden;
+    min-height: 100vh;
 }
 
 #terminal {
     padding: 20px;
     height: 100vh;
     overflow-y: auto;
+    word-wrap: break-word;
 }
 
 .line {
     margin: 5px 0;
+    line-height: 1.4;
 }
 
 .input-line {
     display: flex;
+    gap: 5px;
 }
 
 .prompt {
-    margin-right: 5px;
+    color: #0f0;
+    font-weight: bold;
+    flex-shrink: 0;
 }
 
 input {
     background: none;
     border: none;
-    color: white;
+    color: #0f0;
     outline: none;
-    font-family: monospace;
-    width: 100%;
+    font-family: 'Courier New', monospace;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+input:focus {
+    text-shadow: 0 0 5px #0f0;
 }
 
 .glow {
-    text-shadow: 0 0 5px white;
+    text-shadow: 0 0 5px #0f0;
+    font-weight: bold;
+}
+
+.error {
+    color: #ff3333;
+}
+
+@media (max-width: 600px) {
+    #terminal {
+        padding: 10px;
+        font-size: 14px;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<div id="terminal">
+<main id="terminal" role="log" aria-label="Terminal output">
     <div class="line glow">[ PandaHecker v1.0 ]</div>
-    <div class="line">Type "help" to begin.</div>
-</div>
+    <div class="line" id="intro"></div>
+</main>
 
 <script>
 const terminal = document.getElementById("terminal");
+const introLine = document.getElementById("intro");
+const COMMANDS = {
+    help: {
+        description: "Show available commands",
+        execute: () => {
+            addLine("Commands:");
+            addLine("  about    - who I am");
+            addLine("  projects - my work");
+            addLine("  contact  - info");
+            addLine("  clear    - clear screen");
+            addLine("  help     - show this");
+        }
+    },
+    about: {
+        description: "About PandaHecker",
+        execute: () => {
+            addLine("PandaHecker - Developer & Builder");
+            addLine("Creating tools, games, and systems.");
+        }
+    },
+    projects: {
+        description: "View projects",
+        execute: () => {
+            addLine("• Code Jumpers");
+            addLine("• Custom tools");
+            addLine("• Experimental builds");
+        }
+    },
+    contact: {
+        description: "Contact information",
+        execute: () => {
+            addLine("Coming soon...");
+        }
+    },
+    clear: {
+        description: "Clear screen",
+        execute: () => {
+            terminal.innerHTML = '<div class="line glow">[ PandaHecker v1.0 ]</div>';
+        }
+    }
+};
 
 function addLine(text) {
     const line = document.createElement("div");
@@ -74,67 +138,52 @@ function createInput() {
     prompt.textContent = ">";
 
     const input = document.createElement("input");
+    input.type = "text";
+    input.autocomplete = "off";
+    input.spellcheck = "false";
+    input.setAttribute("aria-label", "Terminal input");
 
     line.appendChild(prompt);
     line.appendChild(input);
     terminal.appendChild(line);
+    terminal.scrollTop = terminal.scrollHeight;
 
     input.focus();
 
-    input.addEventListener("keydown", function(e) {
+    input.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
-            handleCommand(input.value);
+            const cmd = input.value.trim();
+            if (cmd) {
+                handleCommand(cmd);
+            }
             line.remove();
         }
     });
 }
 
 function handleCommand(cmd) {
-    addLine("> " + cmd);
+    addLine(`> ${cmd}`);
+    const lowerCmd = cmd.toLowerCase();
 
-    cmd = cmd.toLowerCase();
-
-    if (cmd === "help") {
-        addLine("Commands:");
-        addLine("about - who I am");
-        addLine("projects - my work");
-        addLine("clear - clear screen");
-        addLine("contact - info");
-    }
-
-    else if (cmd === "about") {
-        addLine("PandaHecker - Developer & Builder");
-        addLine("Creating tools, games, and systems.");
-    }
-
-    else if (cmd === "projects") {
-        addLine("• Code Jumpers");
-        addLine("• Custom tools");
-        addLine("• Experimental builds");
-    }
-
-    else if (cmd === "contact") {
-        addLine("Coming soon...");
-    }
-
-    else if (cmd === "clear") {
-        terminal.innerHTML = "";
-    }
-
-    else {
-        addLine("Unknown command");
+    if (COMMANDS[lowerCmd]) {
+        COMMANDS[lowerCmd].execute();
+    } else {
+        const errorLine = document.createElement("div");
+        errorLine.className = "line error";
+        errorLine.textContent = "Unknown command";
+        terminal.appendChild(errorLine);
     }
 
     createInput();
 }
 
-// typing effect intro
+// Typing effect for intro
 const introText = "Initializing system...";
 let i = 0;
 
 function typeIntro() {
     if (i < introText.length) {
-        document.querySelector(".line").textContent += introText.charAt(i);
+        introLine.textContent += introText.charAt(i);
         i++;
         setTimeout(typeIntro, 40);
     } else {
@@ -142,7 +191,6 @@ function typeIntro() {
     }
 }
 
-document.querySelector(".line").textContent = "";
 typeIntro();
 </script>
 
